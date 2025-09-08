@@ -1,0 +1,144 @@
+<!DOCTYPE html>  
+<html lang="zh-CN">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Bing背景时钟</title>  
+    <style>  
+        body {  
+            margin: 0;  
+            padding: 0;  
+            height: 100vh;  
+            background-size: cover;  
+            background-position: center;  
+            background-repeat: no-repeat;  
+            display: flex;  
+            justify-content: center;  
+            align-items: center;  
+            font-family: sans-serif;  
+            color: white;  
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  
+        }  
+  
+        .container {  
+            text-align: center;  
+            background-color: rgba(0, 0, 0, 0.3);  
+            padding: 20px;  
+            border-radius: 10px;  
+        }  
+  
+        .time {  
+            font-size: 3rem;  
+            font-weight: bold;  
+            margin-bottom: 10px;  
+        }  
+  
+        .date {  
+            font-size: 1.5rem;  
+            margin-bottom: 15px;  
+        }  
+  
+        .hitokoto {  
+            font-size: 1rem;  
+            margin: 10px 0;  
+            font-style: italic;  
+        }  
+  
+        .bing-copyright {  
+            font-size: 0.8rem;  
+            margin-top: 15px;  
+            font-style: italic;  
+        }  
+    </style>  
+</head>  
+<body>  
+<div class="container">  
+    <div class="time" id="time">00:00:00</div>  
+    <div class="date" id="date">2023年1月1日 星期日</div>  
+    <div class="hitokoto" id="hitokoto"></div>  
+    <div class="bing-copyright" id="bingCopyright">Bing Background Image</div>  
+</div>  
+  
+<script>  
+    // 简化版本的获取Bing图片函数  
+    function getBingImage() {  
+        try {  
+            // Kindle可能不支持async/await，使用传统方式  
+            var xhr = new XMLHttpRequest();  
+            xhr.open('GET', 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN', true);  
+            xhr.onreadystatechange = function() {  
+                if (xhr.readyState === 4 && xhr.status === 200) {  
+                    var data = JSON.parse(xhr.responseText);  
+                    var imageUrl = 'https://www.bing.com' + data.images[0].url;  
+                    var copyright = data.images[0].copyright;  
+  
+                    document.body.style.backgroundImage = 'url(' + imageUrl + ')';  
+                    document.getElementById('bingCopyright').textContent = copyright;  
+                }  
+            };  
+            xhr.onerror = function() {  
+                document.body.style.backgroundColor = '#2c3e50';  
+            };  
+            xhr.send();  
+        } catch (error) {  
+            document.body.style.backgroundColor = '#2c3e50';  
+        }  
+    }  
+  
+    // 简化版本的获取一言函数  
+    function getHitokoto() {  
+        try {  
+            var categories = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];  
+            var randomCategory = categories[Math.floor(Math.random() * categories.length)];  
+  
+            var xhr = new XMLHttpRequest();  
+            xhr.open('GET', 'https://v1.hitokoto.cn/?c=' + randomCategory + '&encode=json', true);  
+            xhr.onreadystatechange = function() {  
+                if (xhr.readyState === 4 && xhr.status === 200) {  
+                    var data = JSON.parse(xhr.responseText);  
+                    var hitokotoText = '';  
+                    if (data.from_who && data.from) {  
+                        hitokotoText = data.hitokoto + ' —— ' + data.from_who + '《' + data.from + '》';  
+                    } else if (data.from) {  
+                        hitokotoText = data.hitokoto + ' —— 《' + data.from + '》';  
+                    } else {  
+                        hitokotoText = data.hitokoto;  
+                    }  
+                    document.getElementById('hitokoto').textContent = hitokotoText;  
+                }  
+            };  
+            xhr.send();  
+        } catch (error) {  
+            document.getElementById('hitokoto').textContent = '未能获取内容';  
+        }  
+    }  
+  
+    // 更新时间显示  
+    function updateTime() {  
+        var now = new Date();  
+        var hours = String(now.getHours()).padStart(2, '0');  
+        var minutes = String(now.getMinutes()).padStart(2, '0');  
+        var timeString = hours + ':' + minutes;  
+  
+        var year = now.getFullYear();  
+        var month = now.getMonth() + 1;  
+        var day = now.getDate();  
+        var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];  
+        var weekday = weekdays[now.getDay()];  
+        var dateString = year + '年' + month + '月' + day + '日 ' + weekday;  
+  
+        document.getElementById('time').textContent = timeString;  
+        document.getElementById('date').textContent = dateString;  
+    }  
+  
+    // 初始化  
+    getBingImage();  
+    updateTime();  
+    getHitokoto();  
+  
+    // 设置定时器  
+    setInterval(updateTime, 60000);  
+    setInterval(getHitokoto, 3600000);  
+</script>  
+</body>  
+</html>

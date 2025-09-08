@@ -116,7 +116,7 @@
       var script = document.createElement('script');
       var categories = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
       var randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      script.src = 'https://v1.hitokoto.cn/?c=' + randomCategory + '&encode=json&callback=hitokotoCallback';
+      script.src = 'https://v1.hitokoto.cn/?c=' + randomCategory + '&encode=json';
       script.onerror = function() {
         document.getElementById('hitokoto').textContent = '一言加载失败';
       };

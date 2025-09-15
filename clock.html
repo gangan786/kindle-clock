@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,89 +52,96 @@
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <div class="time" id="time">00:00:00</div>
-    <div class="date" id="date">2023年1月1日 星期日</div>
-    <div class="hitokoto" id="hitokoto"></div>
-    <div class="bing-copyright" id="bingCopyright">Bing Background Image</div>
-</div>
+    <div class="container">
+        <div class="time" id="time">00:00</div>
+        <div class="date" id="date">2023年1月1日 星期日</div>
+        <div class="hitokoto" id="hitokoto"></div>
+        <div class="bing-copyright" id="bingCopyright">Bing Background Image</div>
+    </div>
 
-<script>
-    // 简化版本的获取Bing图片函数
-    async function getBingImage() {
-        try {
-            // 使用CORS代理
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const bingUrl = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN';
-            const response = await fetch(proxyUrl + encodeURIComponent(bingUrl));
-            const data = await response.json();
-            const imageUrl = 'https://www.bing.com' + data.images[0].url;
-            const copyright = data.images[0].copyright;
+    <script>
+        // 简化版本的获取Bing图片函数
+        async function getBingImage() {
+            try {
+                // 使用CORS代理
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const bingUrl = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN';
+                const response = await fetch(proxyUrl + encodeURIComponent(bingUrl));
+                const data = await response.json();
+                const imageUrl = 'https://www.bing.com' + data.images[0].url;
+                const copyright = data.images[0].copyright;
 
-            document.body.style.backgroundImage = `url(${imageUrl})`;
-            document.getElementById('bingCopyright').textContent = copyright;
-        } catch (error) {
-            console.error('获取Bing图片失败:', error);
-            // 如果获取失败，使用默认背景色
-            document.body.style.backgroundColor = '#2c3e50';
+                document.body.style.backgroundImage = `url(${imageUrl})`;
+                document.getElementById('bingCopyright').textContent = copyright;
+            } catch (error) {
+                console.error('获取Bing图片失败:', error);
+                // 如果获取失败，使用默认背景色
+                document.body.style.backgroundColor = '#2c3e50';
+            }
         }
-    }
 
-    // 简化版本的获取一言函数
-    function getHitokoto() {
-        try {
-            var categories = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
-            var randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        // 简化版本的获取一言函数
+        function getHitokoto() {
+            try {
+                var categories = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+                var randomCategory = categories[Math.floor(Math.random() * categories.length)];
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://v1.hitokoto.cn/?c=' + randomCategory + '&encode=json', true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    var hitokotoText = '';
-                    if (data.from_who && data.from) {
-                        hitokotoText = data.hitokoto + ' —— ' + data.from_who + '《' + data.from + '》';
-                    } else if (data.from) {
-                        hitokotoText = data.hitokoto + ' —— 《' + data.from + '》';
-                    } else {
-                        hitokotoText = data.hitokoto;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://v1.hitokoto.cn/?c=' + randomCategory + '&encode=json', true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText);
+                        var hitokotoText = '';
+                        if (data.from_who && data.from) {
+                            hitokotoText = data.hitokoto + ' —— ' + data.from_who + '《' + data.from + '》';
+                        } else if (data.from) {
+                            hitokotoText = data.hitokoto + ' —— 《' + data.from + '》';
+                        } else {
+                            hitokotoText = data.hitokoto;
+                        }
+                        document.getElementById('hitokoto').textContent = hitokotoText;
                     }
-                    document.getElementById('hitokoto').textContent = hitokotoText;
-                }
-            };
-            xhr.send();
-        } catch (error) {
-            document.getElementById('hitokoto').textContent = '未能获取内容';
+                };
+                xhr.send();
+            } catch (error) {
+                document.getElementById('hitokoto').textContent = '未能获取内容';
+            }
         }
-    }
 
-    // 更新时间显示
-    function updateTime() {
-        var now = new Date();
-        var hours = String(now.getHours()).padStart(2, '0');
-        var minutes = String(now.getMinutes()).padStart(2, '0');
-        var timeString = hours + ':' + minutes;
+        // 更新时间显示
+        function updateTime() {
+            var now = new Date();
+            // 转换为东八区时间
+            var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            var eastEight = new Date(utc + (3600000 * 8));
 
-        var year = now.getFullYear();
-        var month = now.getMonth() + 1;
-        var day = now.getDate();
-        var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-        var weekday = weekdays[now.getDay()];
-        var dateString = year + '年' + month + '月' + day + '日 ' + weekday;
+            var hours = String(eastEight.getHours()).padStart(2, '0');
+            var minutes = String(eastEight.getMinutes()).padStart(2, '0');
+            // 移除了秒钟的显示
+            var timeString = hours + ':' + minutes;
 
-        document.getElementById('time').textContent = timeString;
-        document.getElementById('date').textContent = dateString;
-    }
+            var year = eastEight.getFullYear();
+            var month = eastEight.getMonth() + 1;
+            var day = eastEight.getDate();
+            var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            var weekday = weekdays[eastEight.getDay()];
+            var dateString = year + '年' + month + '月' + day + '日 ' + weekday;
 
-    // 初始化
-    getBingImage();
-    updateTime();
-    getHitokoto();
+            document.getElementById('time').textContent = timeString;
+            document.getElementById('date').textContent = dateString;
+        }
 
-    // 设置定时器
-    setInterval(updateTime, 60000);
-    setInterval(getHitokoto, 3600000);
-</script>
+        // 初始化
+        getBingImage();
+        updateTime();
+        getHitokoto();
+
+        // 设置定时器，每分钟更新一次时间
+        setInterval(updateTime, 60000);
+        setInterval(getHitokoto, 3600000);
+    </script>
 </body>
+
 </html>

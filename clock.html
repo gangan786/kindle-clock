@@ -10,22 +10,26 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             font-family: sans-serif;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            background-color: #f0f0f0; /* 默认背景色 */
         }
 
         .container {
+            position: relative;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             text-align: center;
             background-color: rgba(0, 0, 0, 0.3);
             padding: 20px;
             border-radius: 10px;
+            max-width: 80%;
+            z-index: 10;
+            margin-bottom: 20px;
         }
 
         .time {
@@ -50,10 +54,27 @@
             margin-top: 15px;
             font-style: italic;
         }
+
+        .image-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
     </style>
 </head>
 
 <body>
+    <!-- 主容器 -->
     <div class="container">
         <div class="time" id="time">00:00</div>
         <div class="date" id="date">2023年1月1日 星期日</div>
@@ -61,11 +82,15 @@
         <div class="bing-copyright" id="bingCopyright">Bing Background Image</div>
     </div>
 
+    <!-- 图片区域 -->
+    <div class="image-section">
+        <img id="bingImage" src="" alt="Bing Background" />
+    </div>
+
     <script>
-        // 简化版本的获取Bing图片函数
+        // 获取 Bing 图片
         async function getBingImage() {
             try {
-                // 使用CORS代理
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const bingUrl = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN';
                 const response = await fetch(proxyUrl + encodeURIComponent(bingUrl));
@@ -73,16 +98,15 @@
                 const imageUrl = 'https://www.bing.com' + data.images[0].url;
                 const copyright = data.images[0].copyright;
 
-                document.body.style.backgroundImage = `url(${imageUrl})`;
+                document.getElementById('bingImage').src = imageUrl;
                 document.getElementById('bingCopyright').textContent = copyright;
             } catch (error) {
                 console.error('获取Bing图片失败:', error);
-                // 如果获取失败，使用默认背景色
-                document.body.style.backgroundColor = '#2c3e50';
+                document.getElementById('bingImage').src = 'https://via.placeholder.com/1920x1080?text=Bing+Image+Failed';
             }
         }
 
-        // 简化版本的获取一言函数
+        // 获取一言
         function getHitokoto() {
             try {
                 var categories = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
@@ -113,13 +137,11 @@
         // 更新时间显示
         function updateTime() {
             var now = new Date();
-            // 转换为东八区时间
             var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             var eastEight = new Date(utc + (3600000 * 8));
 
             var hours = String(eastEight.getHours()).padStart(2, '0');
             var minutes = String(eastEight.getMinutes()).padStart(2, '0');
-            // 移除了秒钟的显示
             var timeString = hours + ':' + minutes;
 
             var year = eastEight.getFullYear();
@@ -138,7 +160,7 @@
         updateTime();
         getHitokoto();
 
-        // 设置定时器，每分钟更新一次时间
+        // 定时更新
         setInterval(updateTime, 60000);
         setInterval(getHitokoto, 3600000);
     </script>
